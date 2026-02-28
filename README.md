@@ -3,7 +3,7 @@
 RAG 기반 병원 검색 AI 서비스
 
 ### Tech
-- NestJS (API)
+- NestJS (API, Batch)
 - Next.js (Web)
 - LangChain (AI Orchestration)
 - Open AI (LLM & Embeddings)
