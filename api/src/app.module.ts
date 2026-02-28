@@ -7,6 +7,7 @@ import { validate } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { EmbeddingModule } from './embedding/embedding.module';
 import { LangChainModule } from './langchain/langchain.module';
+import { HospitalModule } from './hospital/hospital.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { LangChainModule } from './langchain/langchain.module';
     PrismaModule,
     LangChainModule,
     EmbeddingModule,
+    HospitalModule,
   ],
   controllers: [AppController],
   providers: [AppService],

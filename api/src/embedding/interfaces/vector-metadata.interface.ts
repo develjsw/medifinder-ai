@@ -1,8 +1,8 @@
 export interface HospitalMetadata {
   name: string;
+  tel: string;
   address: string;
-  department: string;
-  phone?: string;
-  latitude?: number;
-  longitude?: number;
+  openDate: string;
+  latitude: number;
+  longitude: number;
 }
