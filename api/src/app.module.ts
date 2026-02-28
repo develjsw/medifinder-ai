@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { openaiConfig, pineconeConfig } from './config/configuration';
 import { validate } from './config/env.validation';
+import { PrismaModule } from './prisma/prisma.module';
 import { EmbeddingModule } from './embedding/embedding.module';
 import { LangChainModule } from './langchain/langchain.module';
 
@@ -14,6 +15,7 @@ import { LangChainModule } from './langchain/langchain.module';
       load: [openaiConfig, pineconeConfig],
       validate,
     }),
+    PrismaModule,
     LangChainModule,
     EmbeddingModule,
   ],

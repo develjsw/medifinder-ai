@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model AddressCode {
+  id           Int        @id @default(autoincrement())
+  sidoCode     String     @map("sido_code") @db.VarChar(10)
+  sidoName     String     @map("sido_name") @db.VarChar(50)
+  sigunguCode  String     @map("sigungu_code") @db.VarChar(10)
+  sigunguName  String     @map("sigungu_name") @db.VarChar(50)
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime?  @updatedAt @map("updated_at")
+  deletedAt    DateTime?  @map("deleted_at")
+
+  hospitals Hospital[]
+
+  @@index([sidoCode, sigunguCode])
+  @@map("address_code")
+}
+
+model Hospital {
+  id            Int          @id @default(autoincrement())
+  addressCodeId Int          @map("address_code_id")
+  name          String       @db.VarChar(100)
+  tel           String       @db.VarChar(20)
+  address       String       @db.VarChar(255)
+  openDate      String       @map("open_date") @db.VarChar(8)
+  latitude      Float
+  longitude     Float
+  createdAt     DateTime     @default(now()) @map("created_at")
+  updatedAt     DateTime?    @updatedAt @map("updated_at")
+  deletedAt     DateTime?    @map("deleted_at")
+
+  addressCode AddressCode @relation(fields: [addressCodeId], references: [id])
+
+  @@index([addressCodeId])
+  @@map("hospital")
+}
