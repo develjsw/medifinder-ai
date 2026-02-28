@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { openaiConfig, pineconeConfig } from './config/configuration';
 import { validate } from './config/env.validation';
+import { LangChainModule } from './langchain/langchain.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { validate } from './config/env.validation';
       load: [openaiConfig, pineconeConfig],
       validate,
     }),
+    LangChainModule,
   ],
   controllers: [AppController],
   providers: [AppService],
