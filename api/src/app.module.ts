@@ -4,6 +4,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { openaiConfig, pineconeConfig } from './config/configuration';
 import { validate } from './config/env.validation';
+import { EmbeddingModule } from './embedding/embedding.module';
 import { LangChainModule } from './langchain/langchain.module';
 
 @Module({
@@ -14,6 +15,7 @@ import { LangChainModule } from './langchain/langchain.module';
       validate,
     }),
     LangChainModule,
+    EmbeddingModule,
   ],
   controllers: [AppController],
   providers: [AppService],
