@@ -8,7 +8,6 @@ RAG 기반 병원 검색 AI 서비스
 
 ### Tech
 - NestJS (API, Batch)
-- Next.js (Web)
 - LangChain (AI Orchestration)
 - Open AI (LLM & Embeddings)
 - Pinecone (Vector DB)
@@ -45,6 +44,7 @@ RAG 기반 병원 검색 AI 서비스
   - EX) 검색: "강남 병원" → 벡터로 변환 → 저장된 벡터들과 비교
     - 병원1. 서울병원 강남구, Score 0.92, 매우 유사
     - 병원2. 부산병원 해운대구, Score 0.41, 덜 유사
+
 ---
 
 ### 공식 문서
@@ -54,5 +54,18 @@ RAG 기반 병원 검색 AI 서비스
 | OpenAI API | https://platform.openai.com |
 | LangChain (TS) | https://docs.langchain.com/oss/javascript/langchain/overview |
 | Pinecone | https://app.pinecone.io |
+
+---
+
+### 현재까지 느낀점
+- 내부에 있는 `비정형 데이터`를 가지고 LLM의 정확한 답변을 만들 때 `Vector DB 사용`
+  - EX) 병원 설명이 적힌 데이터들을 Vector DB에 임베딩 해두고, 사용자가 '배가 너무 아픈데 어떤 병원을 가야할지 추천해줘'라고 했을 때, Vector DB에 저장된 내과병원 유사도를 기준으로 전달해주는 것
+
+
+- 내부에 있는 `정형 데이터`에 대한 데이터 제공은 `RDB 사용`
+  - EX) 강남구에 위치한 병원을 찾아달라고 했을 때, RDB에 저장되어 있는 강남구 데이터와 일치하는지 확인하여 데이터를 내려주는 것
+
+
+- Vector DB의 유사도 부분이 정확도가 많이 떨어진다는 느낌을 받고 있음
 
 ---
