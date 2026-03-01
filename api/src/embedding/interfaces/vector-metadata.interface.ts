@@ -5,4 +5,6 @@ export interface HospitalMetadata {
   openDate: string;
   latitude: number;
   longitude: number;
+  sidoName: string;
+  sigunguName: string;
 }

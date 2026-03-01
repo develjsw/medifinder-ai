@@ -1,5 +1,13 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  ParseIntPipe,
+  Body,
+} from '@nestjs/common';
 import { HospitalService } from './hospital.service';
+import { SearchHospitalDto } from './dto/search-hospital.dto';
 
 @Controller('hospitals')
 export class HospitalController {
@@ -13,5 +21,10 @@ export class HospitalController {
   @Get(':id')
   getHospitalDetail(@Param('id', ParseIntPipe) id: number) {
     return this.hospitalService.findOne(id);
+  }
+
+  @Post('search')
+  getHospitalSearch(@Body() dto: SearchHospitalDto) {
+    return this.hospitalService.search(dto.query);
   }
 }
