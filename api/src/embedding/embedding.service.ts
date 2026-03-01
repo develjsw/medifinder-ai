@@ -30,9 +30,9 @@ export class EmbeddingService implements OnModuleInit {
     );
   }
 
-  async upsertDocuments(docs: Document<HospitalMetadata>[]) {
-    await this.vectorStore.addDocuments(docs);
-  }
+  // async upsertDocuments(docs: Document<HospitalMetadata>[]) {
+  //   await this.vectorStore.addDocuments(docs);
+  // }
 
   async similaritySearch(query: string, topK = 5): Promise<Document[]> {
     return this.vectorStore.similaritySearch(query, topK);
