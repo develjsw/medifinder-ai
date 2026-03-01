@@ -1,10 +1,21 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { openaiConfig, pineconeConfig } from './config/configuration';
+import { validate } from './config/env.validation';
+import { PrismaModule } from './prisma/prisma.module';
+import { HospitalEmbeddingModule } from './hospital-embedding/hospital-embedding.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [openaiConfig, pineconeConfig],
+      validate,
+    }),
+    ScheduleModule.forRoot(),
+    PrismaModule,
+    HospitalEmbeddingModule,
+  ],
 })
 export class AppModule {}
