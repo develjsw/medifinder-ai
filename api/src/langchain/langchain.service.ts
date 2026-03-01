@@ -18,7 +18,8 @@ export class LangChainService {
 
     this.embeddings = new OpenAIEmbeddings({
       openAIApiKey: apiKey,
-      model: 'text-embedding-3-small',
+      model: 'text-embedding-3-small', // 기본 dimensions 출력 1536
+      dimensions: 1024, // 무료 Pinecone 인덱스(test-index) > dimensions 출력 1024
     });
   }
 
