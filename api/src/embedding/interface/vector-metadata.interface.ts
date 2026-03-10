@@ -7,4 +7,5 @@ export interface HospitalMetadata {
   longitude: number;
   sidoName: string;
   sigunguName: string;
+  specialties: string;
 }

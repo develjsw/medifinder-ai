@@ -6,12 +6,16 @@ import {
   ParseIntPipe,
   Body,
 } from '@nestjs/common';
-import { HospitalService } from './hospital.service';
+import { HospitalService } from './service/hospital.service';
+import { HospitalSearchService } from './service/hospital-search.service';
 import { SearchHospitalDto } from './dto/search-hospital.dto';
 
 @Controller('hospitals')
 export class HospitalController {
-  constructor(private readonly hospitalService: HospitalService) {}
+  constructor(
+    private readonly hospitalService: HospitalService,
+    private readonly hospitalSearchService: HospitalSearchService,
+  ) {}
 
   @Get()
   getHospitalList() {
@@ -25,6 +29,6 @@ export class HospitalController {
 
   @Post('search')
   getHospitalSearch(@Body() dto: SearchHospitalDto) {
-    return this.hospitalService.search(dto.query);
+    return this.hospitalSearchService.search(dto.query);
   }
 }

@@ -4,7 +4,7 @@ import { Pinecone } from '@pinecone-database/pinecone';
 import { PineconeStore } from '@langchain/pinecone';
 import { Document } from '@langchain/core/documents';
 import { LangChainService } from '../langchain/langchain.service';
-import { HospitalMetadata } from './interfaces/vector-metadata.interface';
+import { HospitalMetadata } from './interface/vector-metadata.interface';
 
 @Injectable()
 export class EmbeddingService implements OnModuleInit {
@@ -34,7 +34,18 @@ export class EmbeddingService implements OnModuleInit {
   //   await this.vectorStore.addDocuments(docs);
   // }
 
-  async similaritySearch(query: string, topK = 5): Promise<Document[]> {
-    return this.vectorStore.similaritySearch(query, topK);
+  async similaritySearch(
+    query: string,
+    topK = 5,
+  ): Promise<Document<HospitalMetadata>[]> {
+    const results = await this.vectorStore.similaritySearch(query, topK);
+
+    return results.map(
+      (r) =>
+        new Document<HospitalMetadata>({
+          pageContent: r.pageContent,
+          metadata: r.metadata as HospitalMetadata,
+        }),
+    );
   }
 }

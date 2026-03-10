@@ -3,12 +3,13 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { EmbeddingModule } from '../embedding/embedding.module';
 import { LangChainModule } from '../langchain/langchain.module';
 import { HospitalController } from './hospital.controller';
-import { HospitalService } from './hospital.service';
+import { HospitalService } from './service/hospital.service';
+import { HospitalSearchService } from './service/hospital-search.service';
 
 @Module({
   imports: [PrismaModule, EmbeddingModule, LangChainModule],
   controllers: [HospitalController],
-  providers: [HospitalService],
+  providers: [HospitalService, HospitalSearchService],
   exports: [HospitalService],
 })
 export class HospitalModule {}
