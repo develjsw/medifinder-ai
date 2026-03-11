@@ -34,18 +34,21 @@ export class EmbeddingService implements OnModuleInit {
   //   await this.vectorStore.addDocuments(docs);
   // }
 
-  async similaritySearch(
+  async similaritySearchWithScore(
     query: string,
     topK = 5,
-  ): Promise<Document<HospitalMetadata>[]> {
-    const results = await this.vectorStore.similaritySearch(query, topK);
-
-    return results.map(
-      (r) =>
-        new Document<HospitalMetadata>({
-          pageContent: r.pageContent,
-          metadata: r.metadata as HospitalMetadata,
-        }),
+  ): Promise<[Document<HospitalMetadata>, number][]> {
+    const results = await this.vectorStore.similaritySearchWithScore(
+      query,
+      topK,
     );
+
+    return results.map(([doc, score]) => [
+      new Document<HospitalMetadata>({
+        pageContent: doc.pageContent,
+        metadata: doc.metadata as HospitalMetadata,
+      }),
+      score,
+    ]);
   }
 }

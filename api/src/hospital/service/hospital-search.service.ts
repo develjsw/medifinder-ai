@@ -17,6 +17,7 @@ type HospitalWithAddress = Hospital & { addressCode: AddressCode };
 const RRF_K = 60; // RRF 순위 완화 상수
 const TOP_K = 10; // 각 검색 소스별 후보 수
 const FINAL_K = 5; // 최종 반환 문서 수
+const SCORE_THRESHOLD = 0.33; // 벡터 유사도 임계값 (0~1, cosine similarity) : 테스트하면서 조절해야 할 값
 
 const SYSTEM_PROMPT = `당신은 병원 추천 도우미입니다.
 검색된 병원 정보를 바탕으로 사용자의 증상이나 요구에 가장 적합한 병원을 추천하세요.
@@ -44,6 +45,11 @@ export class HospitalSearchService {
    */
   async search(query: string) {
     const docs = await this.hybridSearch(query);
+
+    if (!docs.length) {
+      return { answer: '', sources: [] };
+    }
+
     const context = this.buildContext(docs);
     const answer = await this.generateAnswer(context, query);
 
@@ -53,14 +59,18 @@ export class HospitalSearchService {
     };
   }
 
-  /** 키워드(LIKE) + 벡터(Pinecone) 병렬 검색 → RRF 합산 */
+  /** 키워드(LIKE) + 벡터(Pinecone) 병렬 검색 → Score Filtering → RRF 합산 */
   private async hybridSearch(
     query: string,
   ): Promise<Document<HospitalMetadata>[]> {
-    const [keywordResults, vectorResults] = await Promise.all([
+    const [keywordResults, vectorResultsWithScore] = await Promise.all([
       this.keywordSearch(query),
-      this.embeddingService.similaritySearch(query, TOP_K),
+      this.embeddingService.similaritySearchWithScore(query, TOP_K),
     ]);
+
+    const vectorResults = vectorResultsWithScore
+      .filter(([, score]) => score >= SCORE_THRESHOLD)
+      .map(([doc]) => doc);
 
     return this.rrfFusion(keywordResults, vectorResults);
   }
