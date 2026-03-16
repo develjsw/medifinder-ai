@@ -1,11 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { StringOutputParser } from '@langchain/core/output_parsers';
+import {
+  ChatPromptTemplate,
+  SystemMessagePromptTemplate,
+  HumanMessagePromptTemplate,
+} from '@langchain/core/prompts';
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 
 @Injectable()
 export class LangChainService {
   private readonly chat: ChatOpenAI;
   private readonly embeddings: OpenAIEmbeddings;
+  private readonly outputParser = new StringOutputParser();
 
   constructor(private readonly config: ConfigService) {
     const apiKey = this.config.get<string>('openai.apiKey');
@@ -23,8 +30,21 @@ export class LangChainService {
     });
   }
 
-  getChat(): ChatOpenAI {
-    return this.chat;
+  /** 시스템 프롬프트 + 사용자 메시지를 받아 LLM 답변을 생성 */
+  async generateAnswer(
+    systemPrompt: string,
+    humanMessage: string,
+    variables: Record<string, string>,
+  ): Promise<string> {
+    const prompt = ChatPromptTemplate.fromMessages([
+      SystemMessagePromptTemplate.fromTemplate(systemPrompt),
+      HumanMessagePromptTemplate.fromTemplate(humanMessage),
+    ]);
+
+    const messages = await prompt.formatMessages(variables);
+    const response = await this.chat.invoke(messages);
+
+    return this.outputParser.invoke(response);
   }
 
   getEmbeddings(): OpenAIEmbeddings {

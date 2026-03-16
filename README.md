@@ -4,12 +4,10 @@ RAG 기반 병원 검색 AI 서비스
 
 - 이해하기 쉽게 작성하고자 해석이 들어간 부분이 있습니다.
 
----
-
 ### Tech
 - NestJS (API, Batch)
 - LangChain (AI Orchestration)
-- Open AI (LLM & Embeddings)
+- Open AI (LLM & Embedding Model)
 - Pinecone (Vector DB)
 
 ---
@@ -31,8 +29,6 @@ RAG 기반 병원 검색 AI 서비스
 ### Embedding 이란?
 - 텍스트의 '의미'를 숫자 벡터로 변환하는 것
 - 컴퓨터는 의미를 이해하지 못하기 때문에 숫자 벡터로 변환하여 Vector DB 같은 곳에서 활용하는 데 사용
-
----
 
 ### Vector DB란?
 - 주로 유사도 검색을 위해 사용되며, 임베딩된 데이터(의미를 숫자 벡터로 표현)를 저장하고 검색이 가능하도록 만들어줌
@@ -97,11 +93,9 @@ RAG 기반 병원 검색 AI 서비스
   - EX) 강남구에 위치한 병원을 찾아달라고 했을 때, RDB에 저장되어 있는 강남구 데이터와 일치하는지 확인하여 데이터를 내려주는 것
 
 
-- Vector DB의 유사도 부분이 정확도가 많이 떨어진다는 느낌을 받고 있음
-  - 아래 내용은 간단히 요약해서 Only Vector DB → Hybrid Search + Re-Ranking 을 의미함
-      - Only Vector DB만 사용할 경우, 키워드 매칭이 필요한 쿼리에서 정확도가 떨어짐 (자연어 의미 파악은 잘하지만 정확한 텍스트 매칭은 약함)
-      - 따라서, RDB 키워드 검색 + Vector DB 유사도 검색을 병렬로 동시에 조회한 뒤, RRF로 순위 기반 합산하여 Top-K 확보
-      - 마지막으로 Re-Ranking으로 질문과의 관련성을 재평가하여 재정렬하는 방식으로 정확도를 높일 계획
+- Vector DB만 사용할 경우, 자연어 의미 파악은 잘하지만 키워드 매칭이 필요한 쿼리에서 정확도가 떨어짐
+  - RDB 키워드 검색 + Vector DB 유사도 검색을 병렬로 동시에 조회한 뒤, RRF로 순위 기반 합산하여 Top-K 확보 (Hybrid Search)
+  - 이후 Re-Ranking으로 질문과의 관련성을 재평가하여 재정렬하는 방식으로 정확도를 높일 계획
 
 
 - AI Service는 정확도 튜닝과 병목 파악을 위해 로그 수집이 필수적일 것 같음

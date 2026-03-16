@@ -1,16 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { Hospital } from '../../../generated/prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
+import { HospitalRepository } from '../repository/hospital.repository';
 
 @Injectable()
 export class HospitalService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly hospitalRepository: HospitalRepository) {}
 
   async findAll(): Promise<Hospital[]> {
-    return this.prisma.hospital.findMany();
+    return this.hospitalRepository.findAll();
   }
 
   async findOne(id: number): Promise<Hospital | null> {
-    return this.prisma.hospital.findUnique({ where: { id } });
+    return this.hospitalRepository.findOne(id);
   }
 }
