@@ -9,6 +9,7 @@ RAG 기반 병원 검색 AI 서비스
 - LangChain (AI Orchestration)
 - Open AI (LLM & Embedding Model)
 - Pinecone (Vector DB)
+- Cohere (Re-Ranking)
 
 ---
 
@@ -69,8 +70,8 @@ RAG 기반 병원 검색 AI 서비스
 - **흐름** : 사용자 질문 → 키워드 검색(RDB) + 벡터 검색(Pinecone) 병렬 실행 → RRF(Reciprocal Rank Fusion) 순위 기반 합산 → Top-K 최종 결과
 - **RRF** : 점수 스케일이 다른 두 검색 결과를 순위만으로 공정하게 합산하는 알고리즘
 
-### Re-Ranking (예정)
-- Hybrid Search 결과를 한 번 더 정밀하게 재정렬하여 관련 없는 문서를 걸러내는 단계로 보임
+### Re-Ranking
+- Hybrid Search 결과를 한 번 더 정밀하게 재정렬하여 관련 없는 문서를 걸러내는 과정
 
 ---
 
@@ -103,6 +104,10 @@ RAG 기반 병원 검색 AI 서비스
   - **Latency 로그** : 사용자 → API → LangChain → Vector DB(Pinecone) → LLM API(OpenAI) 등 구간별 응답 시간을 기록해야 병목 구간을 파악할 수 있음
   - 로그는 JSON 형태로 구조화하여 적재하고, 모니터링 도구로 시각화하는 것이 좋을 것 같음
 
+
+- RAG의 핵심은 결국 임베딩 품질인 것 같음
+  - 적은 데이터 임에도 불구하고 + Hybrid Search, Reranking 등 검색 기법을 사용해봐도 원본 임베딩이 부실하면 의미있는 결과가 나오지 않는 것 같음 
+  - 임베딩부터 다시 처리 후 테스트 해볼 예정
 ---
 
 **★참고사항★**
