@@ -2,7 +2,11 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { openaiConfig, pineconeConfig } from './config/configuration';
+import {
+  openaiConfig,
+  pineconeConfig,
+  cohereConfig,
+} from './config/configuration';
 import { validate } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { EmbeddingModule } from './embedding/embedding.module';
@@ -13,7 +17,7 @@ import { HospitalModule } from './hospital/hospital.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [openaiConfig, pineconeConfig],
+      load: [openaiConfig, pineconeConfig, cohereConfig],
       validate,
     }),
     PrismaModule,

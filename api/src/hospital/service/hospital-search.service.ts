@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Document } from '@langchain/core/documents';
 import { EmbeddingService } from '../../embedding/embedding.service';
 import { LangChainService } from '../../langchain/langchain.service';
+import { RerankService } from '../../rerank/rerank.service';
 import { HospitalMetadata } from '../../embedding/interface/vector-metadata.interface';
 import {
   HospitalRepository,
@@ -10,6 +11,7 @@ import {
 
 const RRF_K = 60; // RRF 순위 완화 상수
 const TOP_K = 10; // 각 검색 소스별 후보 수
+const RERANK_CANDIDATES = 10; // Re-Ranking에 전달할 RRF 후보 수
 const FINAL_K = 5; // 최종 반환 문서 수
 const SCORE_THRESHOLD = 0.33; // 벡터 유사도 임계값 (0~1, cosine similarity) : 테스트하면서 조절해야 할 값
 
@@ -31,16 +33,19 @@ export class HospitalSearchService {
     private readonly hospitalRepository: HospitalRepository,
     private readonly embeddingService: EmbeddingService,
     private readonly langChainService: LangChainService,
+    private readonly rerankService: RerankService,
   ) {}
 
   /**
    * 병원 검색 메인 흐름
    * 1. Hybrid Search (키워드 + 벡터 → RRF 합산)
-   * 2. 검색 결과를 컨텍스트로 구성
-   * 3. LLM 답변 생성
+   * 2. Re-Ranking (Cohere Cross-Encoder로 질문-문서 관련성 재정렬)
+   * 3. 검색 결과를 컨텍스트로 구성
+   * 4. LLM 답변 생성
    */
   async search(query: string) {
-    const docs = await this.hybridSearch(query);
+    const candidates = await this.hybridSearch(query);
+    const docs = await this.rerankService.rerank(query, candidates, FINAL_K);
 
     if (!docs.length) {
       return { answer: '', sources: [] };
@@ -104,7 +109,7 @@ export class HospitalSearchService {
 
     return [...scoreMap.values()]
       .sort((a, b) => b.score - a.score)
-      .slice(0, FINAL_K)
+      .slice(0, RERANK_CANDIDATES)
       .map((r) => r.doc);
   }
 

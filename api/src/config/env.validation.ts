@@ -4,6 +4,7 @@ const REQUIRED_ENV_VARS = [
   'PINECONE_API_KEY',
   'PINECONE_INDEX_NAME',
   'PINECONE_HOST',
+  'COHERE_API_KEY',
 ] as const;
 
 export function validate(config: Record<string, unknown>) {

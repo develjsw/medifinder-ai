@@ -9,3 +9,7 @@ export const pineconeConfig = registerAs('pinecone', () => ({
   indexName: process.env.PINECONE_INDEX_NAME,
   host: process.env.PINECONE_HOST,
 }));
+
+export const cohereConfig = registerAs('cohere', () => ({
+  apiKey: process.env.COHERE_API_KEY,
+}));
