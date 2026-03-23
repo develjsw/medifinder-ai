@@ -25,17 +25,7 @@ export class RerankService {
   ): Promise<Document<HospitalMetadata>[]> {
     if (docs.length === 0) return [];
 
-    // pageContent 만으로는 메타데이터(병원명, 주소 등)가 누락되므로 직접 구성
-    const texts = docs.map((doc) => {
-      const m = doc.metadata;
-      return [
-        `병원명: ${m.name}`,
-        `주소: ${m.address}`,
-        `진료과목: ${m.specialties || '정보 없음'}`,
-        doc.pageContent,
-      ].join('\n');
-    });
-
+    const texts = docs.map((doc) => doc.pageContent);
     const ranked = await this.reranker.rerank(texts, query, { topN });
 
     return ranked

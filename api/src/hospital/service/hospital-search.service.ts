@@ -124,20 +124,19 @@ export class HospitalSearchService {
           `주소: ${m.address}`,
           `전화번호: ${m.tel}`,
           `진료과목: ${m.specialties || '정보 없음'}`,
-          `소개: ${doc.pageContent}`,
         ].join('\n');
       })
       .join('\n\n');
   }
 
+  /** DB 조회 결과를 Document로 변환 (키워드 검색용) */
   private toDocument(h: HospitalWithAddress): Document<HospitalMetadata> {
     return new Document<HospitalMetadata>({
       pageContent: [
+        `병원명: ${h.name}`,
+        `위치: ${h.addressCode.sidoName} ${h.addressCode.sigunguName}`,
         `진료과목: ${h.specialties ?? '정보 없음'}`,
-        h.description ?? '',
-      ]
-        .filter(Boolean)
-        .join('\n'),
+      ].join('\n'),
       metadata: {
         name: h.name,
         tel: h.tel,
