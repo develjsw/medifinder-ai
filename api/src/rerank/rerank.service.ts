@@ -4,6 +4,8 @@ import { CohereRerank } from '@langchain/cohere';
 import { Document } from '@langchain/core/documents';
 import { HospitalMetadata } from '../embedding/interface/vector-metadata.interface';
 
+const RERANK_SCORE_THRESHOLD = 0.6; // Rerank 관련성 임계값 (0~1) : 테스트하면서 조절해야 할 값
+
 @Injectable()
 export class RerankService {
   private readonly reranker: CohereRerank;
@@ -36,6 +38,8 @@ export class RerankService {
 
     const ranked = await this.reranker.rerank(texts, query, { topN });
 
-    return ranked.map((r) => docs[r.index]);
+    return ranked
+      .filter((r) => r.relevanceScore >= RERANK_SCORE_THRESHOLD)
+      .map((r) => docs[r.index]);
   }
 }
