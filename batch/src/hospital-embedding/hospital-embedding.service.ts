@@ -1,20 +1,29 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { Pinecone, Index } from '@pinecone-database/pinecone';
 import { PineconeStore } from '@langchain/pinecone';
-import { OpenAIEmbeddings } from '@langchain/openai';
+import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
+import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { Hospital, AddressCode } from '../../generated/prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 type HospitalWithAddress = Hospital & { addressCode: AddressCode };
 
+const SYMPTOM_PROMPT = `당신은 의료 정보 보조 도우미입니다. 진료과목을 보고 환자가 검색할 만한 관련 증상 키워드를 생성하세요.
+
+규칙:
+- 각 진료과목에 대해 대표적인 증상/질환 키워드를 3~5개씩 나열
+- 일반인이 사용할 법한 일상적 표현을 포함 (EX. "배가 아프다", "허리가 아프다")
+- 쉼표로 구분하여 한 줄로 출력
+- 키워드만 출력하고 다른 설명은 하지 마세요`;
+
 @Injectable()
 export class HospitalEmbeddingService implements OnModuleInit {
-  private readonly logger = new Logger(HospitalEmbeddingService.name);
   private vectorStore: PineconeStore;
   private pineconeIndex: Index;
+  private chatModel: ChatOpenAI;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -40,71 +49,68 @@ export class HospitalEmbeddingService implements OnModuleInit {
       pineconeIndex: this.pineconeIndex,
     });
 
-    // 최초 기동 시 1회 동기화
+    this.chatModel = new ChatOpenAI({
+      openAIApiKey: this.config.get<string>('openai.apiKey'),
+      model: 'gpt-4o-mini',
+      temperature: 0,
+    });
+
     await this.syncHospitalEmbeddings();
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleCron() {
-    this.logger.debug('Scheduled hospital embedding sync started');
     await this.syncHospitalEmbeddings();
   }
 
+  /** DB의 신규 병원을 Pinecone에 임베딩 동기화 */
   private async syncHospitalEmbeddings() {
     const hospitals = await this.prisma.hospital.findMany({
       include: { addressCode: true },
     });
-    this.logger.debug(`Found ${hospitals.length} hospitals in DB`);
 
     if (hospitals.length === 0) return;
 
     // Pinecone에 이미 등록된 ID 조회
-    const hospitalIds = hospitals.map((hospital) => `hospital-${hospital.id}`);
+    const hospitalIds = hospitals.map((h) => `hospital-${h.id}`);
     const existing = await this.pineconeIndex.fetch(hospitalIds);
     const existingIds = new Set(Object.keys(existing.records));
 
     // 신규 병원만 필터링
     const newHospitals = hospitals.filter(
-      (hospital) => !existingIds.has(`hospital-${hospital.id}`),
+      (h) => !existingIds.has(`hospital-${h.id}`),
     );
 
-    if (newHospitals.length === 0) {
-      this.logger.debug('No new hospitals to embed. Skipping.');
-      return;
-    }
+    if (newHospitals.length === 0) return;
 
-    const docs = newHospitals.map((h) => this.toDocument(h));
+    const docs = await Promise.all(newHospitals.map((h) => this.toDocument(h)));
     await this.vectorStore.addDocuments(docs, {
-      ids: newHospitals.map((hospital) => `hospital-${hospital.id}`),
+      ids: newHospitals.map((h) => `hospital-${h.id}`),
     });
-
-    this.logger.debug(
-      `Upserted ${docs.length} new documents (skipped ${existingIds.size} existing)`,
-    );
   }
 
-  private toDocument(hospital: HospitalWithAddress): Document {
-    const {
-      name,
-      tel,
-      address,
-      openDate,
-      latitude,
-      longitude,
-      specialties,
-      description,
-      addressCode,
-    } = hospital;
-    const { sidoName, sigunguName } = addressCode;
+  /** DB 병원 → Document 변환 (LLM으로 증상 키워드 보강) */
+  private async toDocument(hospital: HospitalWithAddress): Promise<Document> {
+    const { name, tel, address, openDate, latitude, longitude, specialties } =
+      hospital;
+    const { sidoName, sigunguName } = hospital.addressCode;
 
-    // pageContent: 비정형 텍스트 → 임베딩 유사도 검색 대상
     const contentParts = [
+      `병원명: ${name}`,
+      `위치: ${sidoName} ${sigunguName}`,
       `진료과목: ${specialties ?? '정보 없음'}`,
-      description ?? '',
     ];
 
+    // 진료과목이 있으면 LLM으로 관련 증상 키워드를 생성하여 추가
+    if (specialties) {
+      const symptoms = await this.generateSymptoms(specialties);
+      if (symptoms) {
+        contentParts.push(`관련 증상: ${symptoms}`);
+      }
+    }
+
     return new Document({
-      pageContent: contentParts.filter(Boolean).join('\n'),
+      pageContent: contentParts.join('\n'),
       // metadata: 구조화 데이터 → 필터링/표시용
       metadata: {
         name,
@@ -118,5 +124,18 @@ export class HospitalEmbeddingService implements OnModuleInit {
         specialties: specialties ?? '',
       },
     });
+  }
+
+  /** 진료과목으로부터 관련 증상 키워드를 LLM으로 생성 */
+  private async generateSymptoms(specialties: string): Promise<string | null> {
+    const response = await this.chatModel.invoke([
+      new SystemMessage(SYMPTOM_PROMPT),
+      new HumanMessage(`진료과목: ${specialties}`),
+    ]);
+
+    const content =
+      typeof response.content === 'string' ? response.content.trim() : '';
+
+    return content || null;
   }
 }
