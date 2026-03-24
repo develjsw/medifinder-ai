@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Document } from '@langchain/core/documents';
 import { HospitalMetadata } from '../../common/interface/hospital-metadata.interface';
-import { EmbeddingService } from '../../embedding/embedding.service';
+import { EmbeddingService } from '../../rag/embedding/embedding.service';
 import { HospitalRepository } from '../repository/hospital.repository';
 import { HospitalDocumentMapper } from '../mapper/hospital-document.mapper';
 import {

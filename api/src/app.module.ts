@@ -9,8 +9,7 @@ import {
 } from './config/configuration';
 import { validate } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
-import { EmbeddingModule } from './embedding/embedding.module';
-import { LlmModule } from './llm/llm.module';
+import { RagModule } from './rag/rag.module';
 import { HospitalModule } from './hospital/hospital.module';
 
 @Module({
@@ -21,8 +20,7 @@ import { HospitalModule } from './hospital/hospital.module';
       validate,
     }),
     PrismaModule,
-    LlmModule,
-    EmbeddingModule,
+    RagModule,
     HospitalModule,
   ],
   controllers: [AppController],

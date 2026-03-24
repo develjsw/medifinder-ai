@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { LlmService } from '../../llm/llm.service';
-import { RerankService } from '../../rerank/rerank.service';
+import { LlmService } from '../../rag/llm/llm.service';
+import { RerankService } from '../../rag/rerank/rerank.service';
 import { HybridRetrieverService } from './hybrid-retriever.service';
 import { HospitalDocumentMapper } from '../mapper/hospital-document.mapper';
 import { FINAL_K } from '../constant/search.constant';

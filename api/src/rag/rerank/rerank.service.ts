@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CohereRerank } from '@langchain/cohere';
 import { Document } from '@langchain/core/documents';
-import { HospitalMetadata } from '../common/interface/hospital-metadata.interface';
-import { RERANK_SCORE_THRESHOLD } from '../hospital/constant/search.constant';
+import { HospitalMetadata } from '../../common/interface/hospital-metadata.interface';
+import { RERANK_SCORE_THRESHOLD } from '../../hospital/constant/search.constant';
 
 @Injectable()
 export class RerankService {

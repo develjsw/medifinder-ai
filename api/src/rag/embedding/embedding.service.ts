@@ -4,7 +4,7 @@ import { Pinecone } from '@pinecone-database/pinecone';
 import { PineconeStore } from '@langchain/pinecone';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { Document } from '@langchain/core/documents';
-import { HospitalMetadata } from '../common/interface/hospital-metadata.interface';
+import { HospitalMetadata } from '../../common/interface/hospital-metadata.interface';
 
 /** 벡터 스토어(Pinecone) 연동 — 임베딩 생성 및 유사도 검색 */
 @Injectable()
