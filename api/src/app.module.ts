@@ -10,7 +10,7 @@ import {
 import { validate } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { EmbeddingModule } from './embedding/embedding.module';
-import { LangChainModule } from './langchain/langchain.module';
+import { LlmModule } from './llm/llm.module';
 import { HospitalModule } from './hospital/hospital.module';
 
 @Module({
@@ -21,7 +21,7 @@ import { HospitalModule } from './hospital/hospital.module';
       validate,
     }),
     PrismaModule,
-    LangChainModule,
+    LlmModule,
     EmbeddingModule,
     HospitalModule,
   ],

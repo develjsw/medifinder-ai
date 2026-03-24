@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CohereRerank } from '@langchain/cohere';
 import { Document } from '@langchain/core/documents';
-import { HospitalMetadata } from '../embedding/interface/vector-metadata.interface';
+import { HospitalMetadata } from '../common/interface/hospital-metadata.interface';
 
 const RERANK_SCORE_THRESHOLD = 0.6; // Rerank 관련성 임계값 (0~1) : 테스트하면서 조절해야 할 값
 

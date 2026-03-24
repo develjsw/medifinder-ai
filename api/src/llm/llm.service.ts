@@ -6,31 +6,23 @@ import {
   SystemMessagePromptTemplate,
   HumanMessagePromptTemplate,
 } from '@langchain/core/prompts';
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
+import { ChatOpenAI } from '@langchain/openai';
 
+/** LLM 답변 생성 담당 — 채팅 모델 초기화 및 프롬프트 실행 */
 @Injectable()
-export class LangChainService {
+export class LlmService {
   private readonly chat: ChatOpenAI;
-  private readonly embeddings: OpenAIEmbeddings;
   private readonly outputParser = new StringOutputParser();
 
   constructor(private readonly config: ConfigService) {
-    const apiKey = this.config.get<string>('openai.apiKey');
-
     this.chat = new ChatOpenAI({
-      openAIApiKey: apiKey,
+      openAIApiKey: this.config.get<string>('openai.apiKey'),
       model: 'gpt-4o-mini',
       temperature: 0,
     });
-
-    this.embeddings = new OpenAIEmbeddings({
-      openAIApiKey: apiKey,
-      model: 'text-embedding-3-small', // 기본 dimensions 출력 1536
-      dimensions: 1024, // 무료 Pinecone 인덱스(test-index) > dimensions 출력 1024
-    });
   }
 
-  /** 시스템 프롬프트 + 사용자 메시지를 받아 LLM 답변을 생성 */
+  /** 시스템 프롬프트 + 사용자 메시지 템플릿으로 LLM 답변 생성 */
   async generateAnswer(
     systemPrompt: string,
     humanMessage: string,
@@ -45,9 +37,5 @@ export class LangChainService {
     const response = await this.chat.invoke(messages);
 
     return this.outputParser.invoke(response);
-  }
-
-  getEmbeddings(): OpenAIEmbeddings {
-    return this.embeddings;
   }
 }
