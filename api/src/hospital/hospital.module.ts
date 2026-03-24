@@ -6,7 +6,7 @@ import { RerankModule } from '../rerank/rerank.module';
 import { HospitalController } from './hospital.controller';
 import { HospitalRepository } from './repository/hospital.repository';
 import { HospitalDocumentMapper } from './mapper/hospital-document.mapper';
-import { HybridRetrieverService } from './retrieval/hybrid-retriever.service';
+import { HybridRetrieverService } from './service/hybrid-retriever.service';
 import { HospitalService } from './service/hospital.service';
 import { HospitalSearchService } from './service/hospital-search.service';
 
