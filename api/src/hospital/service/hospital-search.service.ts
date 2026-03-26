@@ -3,7 +3,7 @@ import { LlmService } from '../../rag/llm/llm.service';
 import { RerankService } from '../../rag/rerank/rerank.service';
 import { HybridRetrieverService } from './hybrid-retriever.service';
 import { HospitalDocumentMapper } from '../mapper/hospital-document.mapper';
-import { FINAL_K } from '../constant/search.constant';
+import { FINAL_K, RERANK_SCORE_THRESHOLD } from '../constant/search.constant';
 import { SYSTEM_PROMPT, HUMAN_MESSAGE } from '../constant/prompt.constant';
 
 /**
@@ -13,10 +13,10 @@ import { SYSTEM_PROMPT, HUMAN_MESSAGE } from '../constant/prompt.constant';
 @Injectable()
 export class HospitalSearchService {
   constructor(
-    private readonly retriever: HybridRetrieverService,
+    private readonly hybridRetrieverService: HybridRetrieverService,
     private readonly rerankService: RerankService,
     private readonly llmService: LlmService,
-    private readonly mapper: HospitalDocumentMapper,
+    private readonly hospitalDocumentMapper: HospitalDocumentMapper,
   ) {}
 
   /**
@@ -26,14 +26,19 @@ export class HospitalSearchService {
    * 3. LLM 답변 생성
    */
   async search(query: string) {
-    const candidates = await this.retriever.retrieve(query);
-    const docs = await this.rerankService.rerank(query, candidates, FINAL_K);
+    const retrievedDocs = await this.hybridRetrieverService.retrieve(query);
+    const rankedDocs = await this.rerankService.rerank(
+      query,
+      retrievedDocs,
+      FINAL_K,
+      RERANK_SCORE_THRESHOLD,
+    );
 
-    if (!docs.length) {
+    if (!rankedDocs.length) {
       return { answer: '', sources: [] };
     }
 
-    const context = this.mapper.buildContext(docs);
+    const context = this.hospitalDocumentMapper.buildContext(rankedDocs);
     const answer = await this.llmService.generateAnswer(
       SYSTEM_PROMPT,
       HUMAN_MESSAGE,
@@ -42,7 +47,7 @@ export class HospitalSearchService {
 
     return {
       answer,
-      sources: docs.map((doc) => doc.metadata),
+      sources: rankedDocs.map((doc) => doc.metadata),
     };
   }
 }

@@ -11,11 +11,11 @@ import { ChatOpenAI } from '@langchain/openai';
 /** LLM 답변 생성 담당 — 채팅 모델 초기화 및 프롬프트 실행 */
 @Injectable()
 export class LlmService {
-  private readonly chat: ChatOpenAI;
+  private readonly chatOpenAI: ChatOpenAI;
   private readonly outputParser = new StringOutputParser();
 
   constructor(private readonly config: ConfigService) {
-    this.chat = new ChatOpenAI({
+    this.chatOpenAI = new ChatOpenAI({
       openAIApiKey: this.config.get<string>('openai.apiKey'),
       model: 'gpt-4o-mini',
       temperature: 0,
@@ -28,14 +28,13 @@ export class LlmService {
     humanMessage: string,
     variables: Record<string, string>,
   ): Promise<string> {
-    const prompt = ChatPromptTemplate.fromMessages([
+    const chain = ChatPromptTemplate.fromMessages([
       SystemMessagePromptTemplate.fromTemplate(systemPrompt),
       HumanMessagePromptTemplate.fromTemplate(humanMessage),
-    ]);
+    ])
+      .pipe(this.chatOpenAI)
+      .pipe(this.outputParser);
 
-    const messages = await prompt.formatMessages(variables);
-    const response = await this.chat.invoke(messages);
-
-    return this.outputParser.invoke(response);
+    return chain.invoke(variables);
   }
 }

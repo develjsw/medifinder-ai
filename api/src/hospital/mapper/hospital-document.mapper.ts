@@ -32,13 +32,13 @@ export class HospitalDocumentMapper {
   buildContext(docs: Document<HospitalMetadata>[]): string {
     return docs
       .map((doc, i) => {
-        const m = doc.metadata;
+        const metadata = doc.metadata;
         return [
           `[병원 ${i + 1}]`,
-          `병원명: ${m.name}`,
-          `주소: ${m.address}`,
-          `전화번호: ${m.tel}`,
-          `진료과목: ${m.specialties || '정보 없음'}`,
+          `병원명: ${metadata.name}`,
+          `주소: ${metadata.address}`,
+          `전화번호: ${metadata.tel}`,
+          `진료과목: ${metadata.specialties || '정보 없음'}`,
         ].join('\n');
       })
       .join('\n\n');

@@ -24,14 +24,14 @@ export class HybridRetrieverService {
   async retrieve(query: string): Promise<Document<HospitalMetadata>[]> {
     const keywords = query.split(/\s+/).filter(Boolean);
 
-    const [keywordDocs, vectorResultsWithScore] = await Promise.all([
+    const [keywordDocs, scoredVectorDocs] = await Promise.all([
       this.hospitalRepository
         .findByKeywords(keywords, TOP_K)
         .then((hospitals) => hospitals.map((h) => this.mapper.toDocument(h))),
       this.embeddingService.similaritySearchWithScore(query, TOP_K),
     ]);
 
-    const vectorDocs = vectorResultsWithScore
+    const vectorDocs = scoredVectorDocs
       .filter(([, score]) => score >= SCORE_THRESHOLD)
       .map(([doc]) => doc);
 
