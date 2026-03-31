@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker exec medifinder-mysql mysql -umedifinder -pmedifinder -e \"SELECT name, specialties, address FROM \\\\`medifinder-ai\\\\`.hospital LIMIT 5;\" 2>/dev/null)",
+      "Bash(cd:*)",
+      "Bash(curl -s https://www.npmjs.com/package/llamaindex)",
+      "Bash(npm view:*)",
+      "WebSearch",
+      "Bash(grep -E \"\\\\.\\(md|json\\)$\")",
+      "Bash(npx tsc:*)"
+    ]
+  },
+  "enabledPlugins": {
+    "oh-my-claudecode@omc": true
+  }
+}
