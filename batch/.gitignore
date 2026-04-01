@@ -55,3 +55,9 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# OMC
+# 기본은 전체 무시
+.omc/*
+# 필요한 부분 허용
+#!.omc/AGENTS.md

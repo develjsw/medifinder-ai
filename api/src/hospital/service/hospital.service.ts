@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Hospital } from '../../../generated/prisma/client';
 import { HospitalRepository } from '../repository/hospital.repository';
 
@@ -10,7 +10,11 @@ export class HospitalService {
     return this.hospitalRepository.findAll();
   }
 
-  async findOne(id: number): Promise<Hospital | null> {
-    return this.hospitalRepository.findOne(id);
+  async findOne(id: number): Promise<Hospital> {
+    const hospital = await this.hospitalRepository.findOne(id);
+    if (!hospital) {
+      throw new NotFoundException(`Hospital with id ${id} not found`);
+    }
+    return hospital;
   }
 }

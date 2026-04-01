@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { LlmService } from '../../rag/llm/llm.service';
 import { RerankService } from '../../rag/rerank/rerank.service';
 import { HybridRetrieverService } from './hybrid-retriever.service';
 import { HospitalDocumentMapper } from '../mapper/hospital-document.mapper';
 import { FINAL_K, RERANK_SCORE_THRESHOLD } from '../constant/search.constant';
 import { SYSTEM_PROMPT, HUMAN_MESSAGE } from '../constant/prompt.constant';
+import { HospitalSearchResultDto } from '../dto/hospital.dto';
 
 /**
  * 병원 검색 오케스트레이터
@@ -12,6 +13,8 @@ import { SYSTEM_PROMPT, HUMAN_MESSAGE } from '../constant/prompt.constant';
  */
 @Injectable()
 export class HospitalSearchService {
+  private readonly logger = new Logger(HospitalSearchService.name);
+
   constructor(
     private readonly hybridRetrieverService: HybridRetrieverService,
     private readonly rerankService: RerankService,
@@ -25,7 +28,9 @@ export class HospitalSearchService {
    * 2. Re-Ranking (Cohere Cross-Encoder로 관련성 재정렬)
    * 3. LLM 답변 생성
    */
-  async search(query: string) {
+  async search(query: string): Promise<HospitalSearchResultDto> {
+    this.logger.log(`Searching hospitals: "${query}"`);
+
     const retrievedDocs = await this.hybridRetrieverService.retrieve(query);
     const rankedDocs = await this.rerankService.rerank(
       query,
@@ -35,6 +40,7 @@ export class HospitalSearchService {
     );
 
     if (!rankedDocs.length) {
+      this.logger.warn(`No results after reranking for query: "${query}"`);
       return { answer: '', sources: [] };
     }
 

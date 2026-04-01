@@ -16,8 +16,8 @@ import {
 export class HybridRetrieverService {
   constructor(
     private readonly hospitalRepository: HospitalRepository,
+    private readonly hospitalDocumentMapper: HospitalDocumentMapper,
     private readonly embeddingService: EmbeddingService,
-    private readonly mapper: HospitalDocumentMapper,
   ) {}
 
   /** 키워드·벡터 병렬 검색 → Score Filtering → RRF 합산 */
@@ -27,7 +27,9 @@ export class HybridRetrieverService {
     const [keywordDocs, scoredVectorDocs] = await Promise.all([
       this.hospitalRepository
         .findByKeywords(keywords, TOP_K)
-        .then((hospitals) => hospitals.map((h) => this.mapper.toDocument(h))),
+        .then((hospitals) =>
+          hospitals.map((h) => this.hospitalDocumentMapper.toDocument(h)),
+        ),
       this.embeddingService.similaritySearchWithScore(query, TOP_K),
     ]);
 

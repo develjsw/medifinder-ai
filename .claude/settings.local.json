@@ -7,7 +7,8 @@
       "Bash(npm view:*)",
       "WebSearch",
       "Bash(grep -E \"\\\\.\\(md|json\\)$\")",
-      "Bash(npx tsc:*)"
+      "Bash(npx tsc:*)",
+      "Bash(npx prisma:*)"
     ]
   },
   "enabledPlugins": {

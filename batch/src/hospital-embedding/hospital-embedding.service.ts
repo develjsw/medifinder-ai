@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { ConfigService } from '@nestjs/config';
 import { Pinecone, Index } from '@pinecone-database/pinecone';
@@ -21,6 +21,8 @@ const SYMPTOM_PROMPT = `당신은 의료 정보 보조 도우미입니다. 진�
 
 @Injectable()
 export class HospitalEmbeddingService implements OnModuleInit {
+  private readonly logger = new Logger(HospitalEmbeddingService.name);
+
   private vectorStore: PineconeStore;
   private pineconeIndex: Index;
   private chatModel: ChatOpenAI;
@@ -65,11 +67,17 @@ export class HospitalEmbeddingService implements OnModuleInit {
 
   /** DB의 신규 병원을 Pinecone에 임베딩 동기화 */
   private async syncHospitalEmbeddings() {
+    this.logger.log('Starting hospital embedding sync');
+
     const hospitals = await this.prisma.hospital.findMany({
+      where: { deletedAt: null },
       include: { addressCode: true },
     });
 
-    if (hospitals.length === 0) return;
+    if (hospitals.length === 0) {
+      this.logger.log('No hospitals found in DB, skipping sync');
+      return;
+    }
 
     // Pinecone에 이미 등록된 ID 조회
     const hospitalIds = hospitals.map((h) => `hospital-${h.id}`);
@@ -81,12 +89,17 @@ export class HospitalEmbeddingService implements OnModuleInit {
       (h) => !existingIds.has(`hospital-${h.id}`),
     );
 
-    if (newHospitals.length === 0) return;
+    if (newHospitals.length === 0) {
+      this.logger.log('No new hospitals to sync');
+      return;
+    }
 
+    this.logger.log(`Syncing ${newHospitals.length} new hospitals to Pinecone`);
     const docs = await Promise.all(newHospitals.map((h) => this.toDocument(h)));
     await this.vectorStore.addDocuments(docs, {
       ids: newHospitals.map((h) => `hospital-${h.id}`),
     });
+    this.logger.log('Hospital embedding sync completed');
   }
 
   /** DB 병원 → Document 변환 (LLM으로 증상 키워드 보강) */
@@ -111,7 +124,7 @@ export class HospitalEmbeddingService implements OnModuleInit {
 
     return new Document({
       pageContent: contentParts.join('\n'),
-      // metadata: 구조화 데이터 → 필터링/표시용
+      // metadata: 구조화 데이터 → 필터링+표시용
       metadata: {
         name,
         tel,

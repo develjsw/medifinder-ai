@@ -9,11 +9,11 @@ export class HospitalRepository {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(): Promise<Hospital[]> {
-    return this.prisma.hospital.findMany();
+    return this.prisma.hospital.findMany({ where: { deletedAt: null } });
   }
 
   async findOne(id: number): Promise<Hospital | null> {
-    return this.prisma.hospital.findUnique({ where: { id } });
+    return this.prisma.hospital.findFirst({ where: { id, deletedAt: null } });
   }
 
   /** 키워드 검색 (contains → LIKE '%keyword%') */

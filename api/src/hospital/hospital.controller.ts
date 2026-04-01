@@ -18,17 +18,17 @@ export class HospitalController {
   ) {}
 
   @Get()
-  getHospitalList() {
+  getHospitals() {
     return this.hospitalService.findAll();
   }
 
   @Get(':id')
-  getHospitalDetail(@Param('id', ParseIntPipe) id: number) {
+  getHospitalById(@Param('id', ParseIntPipe) id: number) {
     return this.hospitalService.findOne(id);
   }
 
   @Post('search')
-  getHospitalSearch(@Body() dto: SearchHospitalDto) {
+  searchHospitals(@Body() dto: SearchHospitalDto) {
     return this.hospitalSearchService.search(dto.query);
   }
 }
